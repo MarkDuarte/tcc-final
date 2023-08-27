@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(uuid())
+  name           String
+  surname        String
+  cpf            String           @unique
+  email          String           @unique
+  password       String
+  dateOfBirth    DateTime
+  address        String
+  gender         String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  subscribes     Subscribe[]
+  donations      Donate[]
+  donationAwards DonationAwards[]
+}
+
+model Ong {
+  id           String        @id @default(uuid())
+  name         String
+  cnpj         String        @unique
+  description  String
+  email        String
+  site         String
+  address      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bankAccounts BankAccount[]
+  projectOngs  ProjectOng[]
+  awards       Awards[]
+  donations    Donate[]
+}
+
+model Admin {
+  id       String @id @default(uuid())
+  nameUser String
+  password String
+}
+
+model BankAccount {
+  id             String @id @default(uuid())
+  ong            Ong    @relation(fields: [ongId], references: [id])
+  ongId          String
+  nameBank       String
+  numberAccount  Int
+  agency         Int
+  typeAccount    String
+  currentBalance Float
+}
+
+model ProjectOng {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  fundraisingGoal Float
+  initialDate     DateTime @default(now())
+  endDate         DateTime
+  ongId           String
+  ong             Ong      @relation(fields: [ongId], references: [id])
+}
+
+model Awards {
+  id             String           @id @default(uuid())
+  description    String
+  typeAwards     String
+  valueAwards    Float?
+  gift           String?
+  badge          String?
+  initialDate    DateTime
+  ong            Ong              @relation(fields: [ongId], references: [id])
+  ongId          String
+  donationAwards DonationAwards[]
+}
+
+model Subscribe {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  typeSubscribe  String
+  valueSubscribe Float?
+  initialDate    DateTime @default(now())
+  endTime        DateTime
+}
+
+model Donate {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  ongId         String
+  ong           Ong      @relation(fields: [ongId], references: [id])
+  valueDonation Float
+  dateDonation  DateTime
+}
+
+model DonationAwards {
+  id       String @id @default(uuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  awardsId String
+  awards   Awards @relation(fields: [awardsId], references: [id])
+}
